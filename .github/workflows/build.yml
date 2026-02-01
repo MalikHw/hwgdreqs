@@ -32,8 +32,8 @@ jobs:
       - name: Create distribution package
         run: |
           mkdir HwGDReqs-Windows
-          xcopy build\main.dist HwGDReqs-Windows\ /E /I /Y
-          move build\main.exe HwGDReqs-Windows\HwGDReqs.exe
+          xcopy build\main.dist HwGDReqs-Windows\HwGDReqs.dist\ /E /I /Y
+          move build\main.dist\main.exe HwGDReqs-Windows\HwGDReqs.exe
           copy icon.ico HwGDReqs-Windows\
           copy icon.png HwGDReqs-Windows\
           xcopy icons HwGDReqs-Windows\icons\ /E /I /Y
@@ -83,8 +83,12 @@ jobs:
       - name: Create distribution package
         run: |
           mkdir HwGDReqs-Linux
-          cp -r build/main.dist/* HwGDReqs-Linux/
-          mv build/main.bin HwGDReqs-Linux/HwGDReqs 2>/dev/null || mv build/main HwGDReqs-Linux/HwGDReqs
+          cp -r build/main.dist HwGDReqs-Linux/HwGDReqs.dist
+          if [ -f build/main.dist/main.bin ]; then
+            cp build/main.dist/main.bin HwGDReqs-Linux/HwGDReqs
+          else
+            cp build/main.dist/main HwGDReqs-Linux/HwGDReqs
+          fi
           chmod +x HwGDReqs-Linux/HwGDReqs
           cp icon.png HwGDReqs-Linux/
           cp -r icons HwGDReqs-Linux/
