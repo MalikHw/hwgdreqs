@@ -4,41 +4,87 @@ A desktop application for streamers to manage Geometry Dash level requests from 
 
 ## Features
 
-- **Queue System**: Displays submitted levels with difficulty icons
-- **Level Management**: Copy ID, delete, choose random, or report levels
-- **Live Details**: View complete level information on the right panel
-- **Filters**: Configure length, difficulty, and rated/unrated filters
-- **Auto-Sync**: Real-time synchronization with your submission website
-- **History**: All played levels are archived
-- **Export**: Export your queue to a text file
+- 🎮 Queue system for submitted levels with difficulty icons
+- 📋 Copy ID, delete, choose random, and report functions
+- 🔍 Detailed level information display
+- ⚙️ Customizable filters (length, difficulty, rated status)
+- 🎨 Customize your submission page (gradient/solid/image backgrounds)
+- 💬 Custom submission and offline messages
+- 📊 Level history and queue export
+- 🔄 Real-time sync with web submission page
+
+## Installation
+
+### Windows
+1. Download `HwGDReqs-Windows.zip` from [Releases](https://github.com/MalikHw/hwgdreqs/releases)
+2. Extract the ZIP file
+3. Run `HwGDReqs.exe`
+
+### Linux
+1. Download `HwGDReqs-Linux.tar.gz` from [Releases](https://github.com/MalikHw/hwgdreqs/releases)
+2. Extract: `tar -xzf HwGDReqs-Linux.tar.gz`
+3. Run: `./HwGDReqs`
 
 ## Setup
 
-1. Go to https://hwgdreqs.rf.gd and connect your accounts (Google/Twitch)
-2. Copy your APP-ID from the website
-3. Run HwGDReqs and open Settings
-4. Paste your APP-ID and configure your preferences
-5. Share your submission link with viewers: `hwgdreqs.rf.gd/YOUR-APP-ID/submit`
+1. Visit https://hwgdreqs.rf.gd
+2. Connect your Google account (OAuth) and/or add your Twitch token
+3. Set your streamer name
+4. Copy your APP-ID
+5. Paste the APP-ID into the desktop app when prompted
+6. Share your submission link with viewers!
 
-## Requirements
+## How It Works
 
-- Windows 10/11 or Linux (Ubuntu 20.04+)
-- No Python installation required (bundled)
+### For Streamers:
+- Run the desktop app and authenticate with your APP-ID
+- Configure filters to control what levels viewers can submit
+- Customize your submission page appearance
+- Manage incoming requests in real-time
+- Copy level IDs, delete unwanted submissions, or pick random levels
+
+### For Viewers:
+- Visit your streamer's submission link
+- Enter a Geometry Dash level ID
+- If it matches the filters, it gets added to the queue!
+
+## Icon Files
+
+Place these difficulty face icons in the `icons/` folder:
+- `na.png` - Not Applicable
+- `easy.png` - Easy
+- `normal.png` - Normal
+- `hard.png` - Hard
+- `harder.png` - Harder
+- `insane.png` - Insane
+- `demon.png` - All demon difficulties
 
 ## Building from Source
 
+### Requirements
+- Python 3.11+
+- PySide6
+- Nuitka
+
+### Build Commands
+
+**Windows:**
 ```bash
 pip install -r requirements.txt
-python main.py
-```
-
-To build with Nuitka:
-```bash
 pip install nuitka
-python -m nuitka --standalone --enable-plugin=pyqt6 main.py
+python -m nuitka --standalone --windows-console-mode=disable --enable-plugin=pyside6 --windows-icon-from-ico=icon.ico --include-data-dir=icons=icons --include-data-file=icon.ico=icon.ico --include-data-file=icon.png=icon.png main.py
 ```
 
-## Made by MalikHw47
+**Linux:**
+```bash
+pip install -r requirements.txt
+pip install nuitka
+python -m nuitka --standalone --enable-plugin=pyside6 --include-data-dir=icons=icons --include-data-file=icon.png=icon.png main.py
+```
+
+## Credits
+
+Made with ❤️ by **MalikHw47**
 
 - YouTube: [@MalikHw47](https://youtube.com/@MalikHw47)
 - Twitch: [MalikHw47](https://twitch.tv/MalikHw47)
@@ -46,8 +92,8 @@ python -m nuitka --standalone --enable-plugin=pyqt6 main.py
 
 ## Support
 
-If you find this tool useful, please consider [donating](https://malikhw.github.io/donate)!
+If you find this tool helpful, consider [donating](https://malikhw.github.io/donate)!
 
 ## License
 
-MIT License - Feel free to use and modify!
+MIT License - feel free to use and modify!
