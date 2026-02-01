@@ -21,35 +21,37 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install nuitka ordered-set zstandard
+          pip install nuitka ordered-set
       
       - name: Build with Nuitka
         run: |
-          python -m nuitka --standalone --enable-plugin=pyqt6 --windows-icon-from-ico=icon.ico --include-data-dir=icons=icons main.py --output-dir=build
+          python -m nuitka --standalone --windows-console-mode=disable --enable-plugin=pyside6 --windows-icon-from-ico=icon.ico --include-data-dir=icons=icons --include-data-file=icon.ico=icon.ico --include-data-file=icon.png=icon.png --output-dir=build main.py
+        env:
+          NUITKA_CACHE_DIR: ${{ github.workspace }}/.nuitka
       
-      - name: Package Windows build
+      - name: Create distribution package
         run: |
           mkdir HwGDReqs-Windows
-          xcopy build\main.dist HwGDReqs-Windows\ /E /I
+          xcopy build\main.dist HwGDReqs-Windows\ /E /I /Y
+          move build\main.exe HwGDReqs-Windows\HwGDReqs.exe
           copy icon.ico HwGDReqs-Windows\
           copy icon.png HwGDReqs-Windows\
-          xcopy icons HwGDReqs-Windows\icons\ /E /I
-          echo "HwGDReqs - Geometry Dash Level Request Manager" > HwGDReqs-Windows\README.txt
-          echo "" >> HwGDReqs-Windows\README.txt
-          echo "To run: Double-click main.exe" >> HwGDReqs-Windows\README.txt
-          echo "" >> HwGDReqs-Windows\README.txt
-          echo "Made by MalikHw47" >> HwGDReqs-Windows\README.txt
-          echo "GitHub: github.com/MalikHw47" >> HwGDReqs-Windows\README.txt
+          xcopy icons HwGDReqs-Windows\icons\ /E /I /Y
+          echo Quick Start Guide > HwGDReqs-Windows\README.txt
+          echo. >> HwGDReqs-Windows\README.txt
+          echo 1. Visit https://hwgdreqs.rf.gd to set up your account >> HwGDReqs-Windows\README.txt
+          echo 2. Connect your Google and/or Twitch accounts >> HwGDReqs-Windows\README.txt
+          echo 3. Copy your APP-ID from the website >> HwGDReqs-Windows\README.txt
+          echo 4. Run HwGDReqs.exe and paste your APP-ID >> HwGDReqs-Windows\README.txt
+          echo 5. Share your submission link with viewers! >> HwGDReqs-Windows\README.txt
+          echo. >> HwGDReqs-Windows\README.txt
+          echo Made by MalikHw47 >> HwGDReqs-Windows\README.txt
       
-      - name: Create ZIP
-        run: |
-          powershell Compress-Archive -Path HwGDReqs-Windows -DestinationPath HwGDReqs-Windows.zip
-      
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Archive Windows build
+        uses: actions/upload-artifact@v3
         with:
           name: HwGDReqs-Windows
-          path: HwGDReqs-Windows.zip
+          path: HwGDReqs-Windows/
 
   build-linux:
     runs-on: ubuntu-latest
@@ -61,56 +63,70 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libxcb-xinerama0 libxcb-cursor0
+          sudo apt-get install -y patchelf ccache
+      
+      - name: Install Python dependencies
+        run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install nuitka ordered-set zstandard
+          pip install nuitka ordered-set
       
       - name: Build with Nuitka
         run: |
-          python -m nuitka --standalone --enable-plugin=pyqt6 --include-data-dir=icons=icons main.py --output-dir=build
+          python -m nuitka --standalone --enable-plugin=pyside6 --include-data-dir=icons=icons --include-data-file=icon.png=icon.png --output-dir=build main.py
+        env:
+          NUITKA_CACHE_DIR: ${{ github.workspace }}/.nuitka
       
-      - name: Package Linux build
+      - name: Create distribution package
         run: |
           mkdir HwGDReqs-Linux
           cp -r build/main.dist/* HwGDReqs-Linux/
+          mv build/main.bin HwGDReqs-Linux/HwGDReqs 2>/dev/null || mv build/main HwGDReqs-Linux/HwGDReqs
+          chmod +x HwGDReqs-Linux/HwGDReqs
           cp icon.png HwGDReqs-Linux/
           cp -r icons HwGDReqs-Linux/
-          echo "HwGDReqs - Geometry Dash Level Request Manager" > HwGDReqs-Linux/README.txt
-          echo "" >> HwGDReqs-Linux/README.txt
-          echo "To run: ./main" >> HwGDReqs-Linux/README.txt
-          echo "" >> HwGDReqs-Linux/README.txt
-          echo "Made by MalikHw47" >> HwGDReqs-Linux/README.txt
-          echo "GitHub: github.com/MalikHw47" >> HwGDReqs-Linux/README.txt
-          chmod +x HwGDReqs-Linux/main
+          cat > HwGDReqs-Linux/README.txt << 'EOF'
+          Quick Start Guide
+          
+          1. Visit https://hwgdreqs.rf.gd to set up your account
+          2. Connect your Google and/or Twitch accounts
+          3. Copy your APP-ID from the website
+          4. Run ./HwGDReqs and paste your APP-ID
+          5. Share your submission link with viewers!
+          
+          Made by MalikHw47
+          EOF
       
-      - name: Create archive
-        run: |
-          tar -czf HwGDReqs-Linux.tar.gz HwGDReqs-Linux
-      
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Archive Linux build
+        uses: actions/upload-artifact@v3
         with:
           name: HwGDReqs-Linux
-          path: HwGDReqs-Linux.tar.gz
+          path: HwGDReqs-Linux/
 
-  release:
+  create-release:
     needs: [build-windows, build-linux]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Download Windows artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: HwGDReqs-Windows
+          path: HwGDReqs-Windows
       
       - name: Download Linux artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: HwGDReqs-Linux
+          path: HwGDReqs-Linux
+      
+      - name: Create release archives
+        run: |
+          cd HwGDReqs-Windows && zip -r ../HwGDReqs-Windows.zip . && cd ..
+          cd HwGDReqs-Linux && tar -czf ../HwGDReqs-Linux.tar.gz . && cd ..
       
       - name: Create Release
         uses: softprops/action-gh-release@v1
