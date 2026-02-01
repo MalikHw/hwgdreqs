@@ -2,8 +2,8 @@ name: Build HwGDReqs
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -30,6 +30,7 @@ jobs:
           NUITKA_CACHE_DIR: ${{ github.workspace }}/.nuitka
       
       - name: Create distribution package
+        shell: cmd
         run: |
           mkdir HwGDReqs-Windows
           xcopy build\main.dist HwGDReqs-Windows\HwGDReqs.dist\ /E /I /Y
@@ -37,18 +38,18 @@ jobs:
           copy icon.ico HwGDReqs-Windows\
           copy icon.png HwGDReqs-Windows\
           xcopy icons HwGDReqs-Windows\icons\ /E /I /Y
-          echo Quick Start Guide > HwGDReqs-Windows\README.txt
-          echo. >> HwGDReqs-Windows\README.txt
-          echo 1. Visit https://hwgdreqs.rf.gd to set up your account >> HwGDReqs-Windows\README.txt
-          echo 2. Connect your Google and/or Twitch accounts >> HwGDReqs-Windows\README.txt
-          echo 3. Copy your APP-ID from the website >> HwGDReqs-Windows\README.txt
-          echo 4. Run HwGDReqs.exe and paste your APP-ID >> HwGDReqs-Windows\README.txt
-          echo 5. Share your submission link with viewers! >> HwGDReqs-Windows\README.txt
-          echo. >> HwGDReqs-Windows\README.txt
-          echo Made by MalikHw47 >> HwGDReqs-Windows\README.txt
+          (echo Quick Start Guide) > HwGDReqs-Windows\README.txt
+          (echo.) >> HwGDReqs-Windows\README.txt
+          (echo 1. Visit https://hwgdreqs.rf.gd to set up your account) >> HwGDReqs-Windows\README.txt
+          (echo 2. Connect your Google account) >> HwGDReqs-Windows\README.txt
+          (echo 3. Copy your APP-ID from the website) >> HwGDReqs-Windows\README.txt
+          (echo 4. Run HwGDReqs.exe and paste your APP-ID) >> HwGDReqs-Windows\README.txt
+          (echo 5. Share your submission link with viewers!) >> HwGDReqs-Windows\README.txt
+          (echo.) >> HwGDReqs-Windows\README.txt
+          (echo Made by MalikHw47) >> HwGDReqs-Windows\README.txt
       
       - name: Archive Windows build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: HwGDReqs-Windows
           path: HwGDReqs-Windows/
@@ -105,7 +106,7 @@ jobs:
           EOF
       
       - name: Archive Linux build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: HwGDReqs-Linux
           path: HwGDReqs-Linux/
@@ -113,16 +114,23 @@ jobs:
   create-release:
     needs: [build-windows, build-linux]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
     steps:
+      - name: Generate timestamp tag
+        id: tag
+        run: |
+          TAG="v$(date +%s)"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+      
       - name: Download Windows artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: HwGDReqs-Windows
           path: HwGDReqs-Windows
       
       - name: Download Linux artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: HwGDReqs-Linux
           path: HwGDReqs-Linux
@@ -135,6 +143,9 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.tag.outputs.tag }}
+          body: automated shit
           files: |
             HwGDReqs-Windows.zip
             HwGDReqs-Linux.tar.gz
