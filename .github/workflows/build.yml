@@ -46,7 +46,7 @@ jobs:
           powershell Compress-Archive -Path HwGDReqs-Windows -DestinationPath HwGDReqs-Windows.zip
       
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: HwGDReqs-Windows
           path: HwGDReqs-Windows.zip
@@ -92,7 +92,7 @@ jobs:
           tar -czf HwGDReqs-Linux.tar.gz HwGDReqs-Linux
       
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: HwGDReqs-Linux
           path: HwGDReqs-Linux.tar.gz
